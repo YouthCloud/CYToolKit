@@ -16,9 +16,9 @@
 #import <netinet/in.h>
 #import <CommonCrypto/CommonDigest.h>
 
+#import "CoreTelephony.h"
 
 #import "Marcos.h"
-#import "MobClick.h"
 
 
 static const NSInteger k4MImageDataSize = 4 * 1024 * 1024;  // 4M
@@ -28,7 +28,110 @@ static const NSInteger k1MImageDataSize = 1 * 1024 * 1024;
 
 @implementation DKUtils
 
+// 获取设备的mac地址
++ (NSString *)macAddress
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *macAddr = [defaults objectForKey:MACADDRESS];
+    if (macAddr != nil)
+    {
+        //NSLog(@"Retrieve mac address from user defaults.");
+        return macAddr;
+    }
+    
+    int                 mib[6];
+    size_t              len = 0;
+    char                *buf = NULL;
+    unsigned char       *ptr = NULL;
+    struct if_msghdr    *ifm = NULL;
+    struct sockaddr_dl  *sdl = NULL;
+    
+    mib[0] = CTL_NET;
+    mib[1] = AF_ROUTE;
+    mib[2] = 0;
+    mib[3] = AF_LINK;
+    mib[4] = NET_RT_IFLIST;
+    mib[5] = if_nametoindex("en0");
+    
+    if (0 == mib[5])
+    {
+        NSLog(@"Error: if_nametoindex error.");
+        return @"0";
+    }
+    
+    if (sysctl(mib, 6, NULL, &len, NULL, 0) < 0)
+    {
+        NSLog(@"Error: sysctl, take 1.");
+        return @"0";
+    }
+    
+    buf = malloc(len);
+    if (buf == NULL)
+    {
+        NSLog(@"Error: Could not allocate memory.");
+        return @"0";
+    }
+    
+    if (sysctl(mib, 6, buf, &len, NULL, 0) < 0)
+    {
+        NSLog(@"Error: sysctl, take 2.");
+        free(buf);
+        return @"0";
+    }
+    
+    ifm = (struct if_msghdr *)buf;
+    sdl = (struct sockaddr_dl *)(ifm + 1);
+    ptr = (unsigned char *)LLADDR(sdl);
+    NSString *outstring = [NSString stringWithFormat:@"%02X%02X%02X%02X%02X%02X", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4), *(ptr + 5)];
+    
+    free(buf);
+    macAddr = [outstring uppercaseString];
+    if ([macAddr length] > 0)
+    {
+        [defaults setObject:macAddr forKey:MACADDRESS];
+        [defaults synchronize];
+        //NSLog(@"Save mac address to user defaults.");
+        return macAddr;
+    }
+    else
+    {
+        return @"0";
+    }
+}
 
+// 获取设备的IMEI
++ (NSString *)deviceIMEI
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *imei = [defaults objectForKey:DEVICEIMEI];
+    if (imei != nil)
+    {
+        //NSLog(@"Retrieve IMEI from user defaults.");
+        return imei;
+    }
+    
+    struct CTServerConnection *connection = NULL;
+    struct CTResult result;
+    NSDictionary *info = nil;
+    
+    connection = _CTServerConnectionCreate(kCFAllocatorDefault, callback, NULL);
+    _CTServerConnectionCopyMobileEquipmentInfo(&result, connection, &info);
+    if (connection != NULL)
+    {
+        CFRelease(connection);
+    }
+    
+    imei = (NSString*)info[(__bridge NSString*)kCTMobileEquipmentInfoIMEI];
+    if ([imei length] == 0)
+    {
+        imei = @"0";
+    }
+    
+    [defaults setObject:imei forKey:DEVICEIMEI];
+    [defaults synchronize];
+    //NSLog(@"Save IMEI to user defaults.");
+    return imei;
+}
 
 // 获取当前程序的版本号
 + (NSString *)curAppVersion

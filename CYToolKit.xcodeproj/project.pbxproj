@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BB9A22841B0C925E00AFE906 /* DKUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = BB9A22821B0C925E00AFE906 /* DKUtils.m */; };
+		BB9A22861B0C92E400AFE906 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB9A22851B0C92E400AFE906 /* CoreTelephony.framework */; };
 		BBFBC1441B0480BC00555AE6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBFBC1431B0480BC00555AE6 /* Foundation.framework */; };
 		BBFBC1461B0480BC00555AE6 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBFBC1451B0480BC00555AE6 /* CoreGraphics.framework */; };
 		BBFBC1481B0480BC00555AE6 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBFBC1471B0480BC00555AE6 /* UIKit.framework */; };
@@ -137,6 +139,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BB9A22811B0C925E00AFE906 /* DKUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DKUtils.h; sourceTree = "<group>"; };
+		BB9A22821B0C925E00AFE906 /* DKUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DKUtils.m; sourceTree = "<group>"; };
+		BB9A22831B0C925E00AFE906 /* Marcos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Marcos.h; sourceTree = "<group>"; };
+		BB9A22851B0C92E400AFE906 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
+		BB9A22871B0C934000AFE906 /* CoreTelephony.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreTelephony.h; sourceTree = "<group>"; };
 		BBFBC1401B0480BC00555AE6 /* CYToolKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CYToolKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBFBC1431B0480BC00555AE6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		BBFBC1451B0480BC00555AE6 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -368,6 +375,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BB9A22861B0C92E400AFE906 /* CoreTelephony.framework in Frameworks */,
 				BBFBC1461B0480BC00555AE6 /* CoreGraphics.framework in Frameworks */,
 				BBFBC1481B0480BC00555AE6 /* UIKit.framework in Frameworks */,
 				BBFBC1441B0480BC00555AE6 /* Foundation.framework in Frameworks */,
@@ -387,6 +395,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BB9A22801B0C925E00AFE906 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				BB9A22871B0C934000AFE906 /* CoreTelephony.h */,
+				BB9A22811B0C925E00AFE906 /* DKUtils.h */,
+				BB9A22821B0C925E00AFE906 /* DKUtils.m */,
+				BB9A22831B0C925E00AFE906 /* Marcos.h */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
 		BBFBC1371B0480BC00555AE6 = {
 			isa = PBXGroup;
 			children = (
@@ -409,6 +428,7 @@
 		BBFBC1421B0480BC00555AE6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				BB9A22851B0C92E400AFE906 /* CoreTelephony.framework */,
 				BBFBC1431B0480BC00555AE6 /* Foundation.framework */,
 				BBFBC1451B0480BC00555AE6 /* CoreGraphics.framework */,
 				BBFBC1471B0480BC00555AE6 /* UIKit.framework */,
@@ -420,6 +440,7 @@
 		BBFBC1491B0480BC00555AE6 /* CYToolKit */ = {
 			isa = PBXGroup;
 			children = (
+				BB9A22801B0C925E00AFE906 /* Utils */,
 				BBFBC1781B04813B00555AE6 /* Category */,
 				BBFBC1521B0480BC00555AE6 /* CYAppDelegate.h */,
 				BBFBC1531B0480BC00555AE6 /* CYAppDelegate.m */,
@@ -1126,6 +1147,7 @@
 				BBFBC2821B04813B00555AE6 /* NSObject+AddProperty.m in Sources */,
 				BBFBC2A11B04813B00555AE6 /* UIColor+Random.m in Sources */,
 				BBFBC2C81B04813B00555AE6 /* UIViewController+MJPopupViewController.m in Sources */,
+				BB9A22841B0C925E00AFE906 /* DKUtils.m in Sources */,
 				BBFBC2931B04813B00555AE6 /* NSString+UUID.m in Sources */,
 				BBFBC2841B04813B00555AE6 /* NSObject+AutoCoding.m in Sources */,
 				BBFBC2BF1B04813B00555AE6 /* UIView+Animation.m in Sources */,
@@ -1385,6 +1407,7 @@
 				BBFBC1741B0480BC00555AE6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		BBFBC1751B0480BC00555AE6 /* Build configuration list for PBXNativeTarget "CYToolKitTests" */ = {
 			isa = XCConfigurationList;
@@ -1393,6 +1416,7 @@
 				BBFBC1771B0480BC00555AE6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

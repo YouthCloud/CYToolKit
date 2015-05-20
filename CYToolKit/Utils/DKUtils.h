@@ -7,14 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "UIAlertView+UFBlock.h"
 
 @class DKVersionInfo;
 
 @interface DKUtils : NSObject
 
 
+// 获取设备的mac地址
++ (NSString *)macAddress;
 
+// 获取设备的IMEI
++ (NSString *)deviceIMEI;
 
 // 获取当前程序的版本号
 + (NSString *)curAppVersion;
