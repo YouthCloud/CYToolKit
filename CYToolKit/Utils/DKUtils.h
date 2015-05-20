@@ -14,11 +14,7 @@
 @interface DKUtils : NSObject
 
 
-// 获取设备的mac地址
-+ (NSString *)macAddress;
 
-// 获取设备的IMEI
-+ (NSString *)deviceIMEI;
 
 // 获取当前程序的版本号
 + (NSString *)curAppVersion;
@@ -26,14 +22,6 @@
 // 判别是否连接网络
 + (BOOL)isNetworkReachable;
 
-// 判别是否需要自动登陆
-+ (BOOL)shouldAutoLoginToServer;
-
-// 判别在2G/3G网络下是否自动接收图片
-+ (BOOL)shouldReceivePictureOnCellNetwork;
-
-// 判别当前网络是否为WWAN
-+ (BOOL)currentNetworkIsWWAN;
 
 
 /** url编码
@@ -43,8 +31,6 @@
  */
 + (NSString *)encodeToPercentEscapeString:(NSString *)input;
 
-// 检测版本更新
-+ (DKVersionInfo *)checkNewVersion;
 
 // 下载最新版本
 + (void)downLoadNewVersion;
@@ -74,10 +60,6 @@
 
 + (NSString *)md5:(NSString *)str;
 
-+ (void)setLoginViewControllerAsRootController;
-
-+ (void)setTabbarViewControllerAsRootController;
-
 //显示sessionToken失效,帐号互踢
 + (void)showSessionTokenAlertView;
 
@@ -94,10 +76,5 @@
 
 + (CGFloat)getHeightFromLabel:(UILabel *)label;
 
-//判断移动运营商
-
-+ (NSUInteger)checkChinaMobileType;
-
-+ (NSString *)getIpStringByHostName:(NSString *)hostName;
 
 @end

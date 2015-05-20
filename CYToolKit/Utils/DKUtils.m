@@ -7,10 +7,6 @@
 //
 
 #import "DKUtils.h"
-#import "DKVersionInfo.h"
-#import "CoreTelephony.h"
-#import "FYNHttpRequestLoader.h"
-#import "Reachability.h"
 #import <sys/socket.h>
 #import <sys/sysctl.h>
 #import <net/if.h>
@@ -20,22 +16,10 @@
 #import <netinet/in.h>
 #import <CommonCrypto/CommonDigest.h>
 
-#import "DKAppDelegate.h"
-#import "DKLoginViewController.h"
-#import "JSONKit.h"
-#import "AuthHelper.h"
-#import <CoreTelephony/CTCarrier.h>
-#import <CoreTelephony/CTTelephonyNetworkInfo.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <string.h>
+#import "Marcos.h"
+#import "MobClick.h"
 
-extern NSString *sessionToken;
-extern NSInteger lid;
 
 static const NSInteger k4MImageDataSize = 4 * 1024 * 1024;  // 4M
 static const NSInteger k3MImageDataSize = 3 * 1024 * 1024;
@@ -45,110 +29,6 @@ static const NSInteger k1MImageDataSize = 1 * 1024 * 1024;
 @implementation DKUtils
 
 
-// 获取设备的mac地址
-+ (NSString *)macAddress
-{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *macAddr = [defaults objectForKey:MACADDRESS];
-    if (macAddr != nil)
-    {
-        //NSLog(@"Retrieve mac address from user defaults.");
-        return macAddr;
-    }
-    
-    int                 mib[6];
-    size_t              len = 0;
-    char                *buf = NULL;
-    unsigned char       *ptr = NULL;
-    struct if_msghdr    *ifm = NULL;
-    struct sockaddr_dl  *sdl = NULL;
-    
-    mib[0] = CTL_NET;
-    mib[1] = AF_ROUTE;
-    mib[2] = 0;
-    mib[3] = AF_LINK;
-    mib[4] = NET_RT_IFLIST;
-    mib[5] = if_nametoindex("en0");
-    
-    if (0 == mib[5])
-    {
-        NSLog(@"Error: if_nametoindex error.");
-        return @"0";
-    }
-    
-    if (sysctl(mib, 6, NULL, &len, NULL, 0) < 0)
-    {
-        NSLog(@"Error: sysctl, take 1.");
-        return @"0";
-    }
-    
-    buf = malloc(len);
-    if (buf == NULL)
-    {
-        NSLog(@"Error: Could not allocate memory.");
-        return @"0";
-    }
-    
-    if (sysctl(mib, 6, buf, &len, NULL, 0) < 0)
-    {
-        NSLog(@"Error: sysctl, take 2.");
-        free(buf);
-        return @"0";
-    }
-    
-    ifm = (struct if_msghdr *)buf;
-    sdl = (struct sockaddr_dl *)(ifm + 1);
-    ptr = (unsigned char *)LLADDR(sdl);
-    NSString *outstring = [NSString stringWithFormat:@"%02X%02X%02X%02X%02X%02X", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4), *(ptr + 5)];
-    
-    free(buf);
-    macAddr = [outstring uppercaseString];
-    if ([macAddr length] > 0)
-    {
-        [defaults setObject:macAddr forKey:MACADDRESS];
-        [defaults synchronize];
-        //NSLog(@"Save mac address to user defaults.");
-        return macAddr;
-    }
-    else
-    {
-        return @"0";
-    }
-}
-
-// 获取设备的IMEI
-+ (NSString *)deviceIMEI
-{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *imei = [defaults objectForKey:DEVICEIMEI];
-    if (imei != nil)
-    {
-        //NSLog(@"Retrieve IMEI from user defaults.");
-        return imei;
-    }
-    
-    struct CTServerConnection *connection = NULL;
-    struct CTResult result;
-    NSDictionary *info = nil;
-    
-    connection = _CTServerConnectionCreate(kCFAllocatorDefault, callback, NULL);
-    _CTServerConnectionCopyMobileEquipmentInfo(&result, connection, &info);
-    if (connection != NULL)
-    {
-        CFRelease(connection);
-    }
-    
-    imei = (NSString*)info[(__bridge NSString*)kCTMobileEquipmentInfoIMEI];
-    if ([imei length] == 0)
-    {
-        imei = @"0";
-    }
-    
-    [defaults setObject:imei forKey:DEVICEIMEI];
-    [defaults synchronize];
-    //NSLog(@"Save IMEI to user defaults.");
-    return imei;
-}
 
 // 获取当前程序的版本号
 + (NSString *)curAppVersion
@@ -189,100 +69,7 @@ static const NSInteger k1MImageDataSize = 1 * 1024 * 1024;
     return ((isReachable && !needsConnection) ? YES : NO);
 }
 
-// 判别当前网络是否为WWAN
-+ (BOOL)currentNetworkIsWWAN
-{
-    BOOL bResult = YES;
-    Reachability *r = [Reachability reachabilityForLocalWiFi];
-    if ( [r currentReachabilityStatus] == ReachableViaWiFi)
-    {
-        NSLog(@"正在使用wifi网络");
-        bResult = NO;
-    }
-    else
-    {
-        NSLog(@"正在使用非wifi网络");
-    }
-    return bResult;
-}
 
-// 判别是否需要自动登陆
-+ (BOOL)shouldAutoLoginToServer
-{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    return [defaults boolForKey:AUTOLOGIN];
-}
-
-+ (BOOL)shouldReceivePictureOnCellNetwork
-{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *userName = [defaults objectForKey:USERNAME];
-    NSString *key = [NSString stringWithFormat:@"%@_%@", SHOULDRECEIVEPICONCELL, userName];
-    return [defaults boolForKey:key];
-}
-
-
-
- //检测版本更新
-+ (DKVersionInfo*)checkNewVersion
-{
-    NSString *stringUrl = [NSString stringWithFormat:@"%@/ClientVersionCheck", APPHUBURL];
-    NSURL *checkUrl = [NSURL URLWithString:stringUrl];
-    
-    NSString *version = [self curAppVersion];
-    NSString *paramsStr = @"device=idk&";
-    paramsStr = [paramsStr stringByAppendingFormat:@"version=%@", version];
-    
-    FYNHttpRequestLoader *httpRequestLoader = [[FYNHttpRequestLoader alloc] init];
-    NSData *receiveData = [httpRequestLoader startSynRequestWithURL:checkUrl withParams:paramsStr];
-    if (receiveData != nil)
-    {
-        NSString *resultStr = [[NSString alloc] initWithData:receiveData encoding:NSUTF8StringEncoding];
-        if ([resultStr length] == 0)
-        {
-            NSLog(@"服务器返回的数据为空.");
-        }
-        else
-        {
-            NSString *latestVersion = nil;
-            BOOL isForceUpdate = NO;
-            BOOL isHasNewVersion = NO;
-            NSString *updateDescription = nil;
-            NSDictionary *resultDic = [resultStr objectFromJSONString];
-            if ([resultDic count] <= 0)
-            {
-                NSLog(@"服务器返回的数据格式错误: %@.", resultDic);
-            }
-            else
-            {
-                NSLog(@"%@",resultDic);
-                VEJsonParser *jsonParser = [[VEJsonParser alloc] initWithJsonDictionary:resultDic];
-                NSInteger resValue = [jsonParser retrieveRusultValue];
-                latestVersion = [jsonParser retrieveLatestVersionValue];
-                isForceUpdate = [jsonParser retrieveIsForceUpdateValue];
-                updateDescription = [jsonParser retrieveUpdateDescriptionValue];
-                if (resValue == HasNewVersion)
-                {
-                    NSLog(@"--- have new version. ---");
-                    isHasNewVersion = YES;
-                }
-                else if (resValue == NoNewVersion)
-                {
-                    NSLog(@"--- no new version. ---");
-                }
-                else
-                {
-                    NSLog(@"server error code: %ld, discription: %@", (long)[jsonParser retrieveRusultValue], [jsonParser retrieveServerErrorMessageValue]);
-                }
-                
-                DKVersionInfo *versionInfo = [[DKVersionInfo alloc] initWithLatesteVersionNumber:latestVersion isForceUpdate:isForceUpdate isHasNewVersion:isHasNewVersion updateDescription:updateDescription];
-                return versionInfo;
-            }
-        }
-    }
-    
-    return NO;
-}
 // url编码
 + (NSString *)encodeToPercentEscapeString:(NSString *)input
 {
@@ -471,21 +258,8 @@ static const NSInteger k1MImageDataSize = 1 * 1024 * 1024;
             ];
 }
 
-+ (void)setLoginViewControllerAsRootController
-{
-    UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
-    DKLoginViewController *loginViewController = [storyBoard instantiateViewControllerWithIdentifier:@"LoginViewController"];
-    DKAppDelegate *appDelegate = (DKAppDelegate *)[UIApplication sharedApplication].delegate;
-    appDelegate.window.rootViewController = loginViewController;
-}
 
-+ (void)setTabbarViewControllerAsRootController
-{
-    UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
-    UITabBarController *tabBarController = [storyBoard instantiateViewControllerWithIdentifier:@"TabBarController"];
-    DKAppDelegate *appDelegate = (DKAppDelegate *)[UIApplication sharedApplication].delegate;
-    appDelegate.window.rootViewController = tabBarController;
-}
+
 
 
 + (void)showSessionTokenAlertView
@@ -502,18 +276,8 @@ static const NSInteger k1MImageDataSize = 1 * 1024 * 1024;
 
 + (void)exitToLogin
 {
-    //取消注册推送服务
-    [[UIApplication sharedApplication] unregisterForRemoteNotifications];
-    //取消自动登录
-    [[DKUserInfoManager shareManager] updateAutoLoginWithUserName:USER_INFO.userName autoLogin:NO];
-    DKAppDelegate *appDelegate = (DKAppDelegate *)[UIApplication sharedApplication].delegate;
-    if ([appDelegate.window.rootViewController isKindOfClass:[UITabBarController class]])
-    {
-        UITabBarController *tabBarController = (UITabBarController *)appDelegate.window.rootViewController;
-        tabBarController.viewControllers = nil;
-        [[AuthHelper getInstance] logoutVpn];
-        [self setLoginViewControllerAsRootController];
-    }
+  
+    
 }
 
 //注册Umeng统计
@@ -572,56 +336,5 @@ static const NSInteger k1MImageDataSize = 1 * 1024 * 1024;
     return retSize.height;
 }
 
-+ (NSUInteger)checkChinaMobileType
-{
-    CTTelephonyNetworkInfo *info = [[CTTelephonyNetworkInfo alloc] init];
-    CTCarrier *carrier = [info subscriberCellularProvider];
-    if (carrier == nil) {
-        return dkMobileType_unknown;
-    }
-    
-    NSString *mobileNetCode = [carrier mobileNetworkCode];
-    if (mobileNetCode == nil) {
-        return dkMobileType_unknown;
-    }
-    if ([@[@"00",@"02",@"07"] containsObject:mobileNetCode]) {
-        return dkMobileType_chinaMobile;
-    }
-    if ([@[@"01",@"06"] containsObject:mobileNetCode]) {
-        return dkMobileType_chinaUnicom;
-    }
-    if ([@[@"03",@"05"] containsObject:mobileNetCode]) {
-        return dkMobileType_chinaTeleCom;
-    }
-    
-    return dkMobileType_unknown;
-}
-
-+ (NSString *)getIpStringByHostName:(NSString *)hostName
-{
-    NSString *ipString = nil;
-    struct addrinfo *answer, hint, *curr;
-    char ipstr[16];
-    bzero(&hint, sizeof(hint));
-    hint.ai_family = AF_INET;
-    hint.ai_socktype = SOCK_STREAM;
-    
-    int ret = getaddrinfo([hostName cStringUsingEncoding:NSUTF8StringEncoding], NULL, &hint, &answer);
-    if (ret != 0) {
-        return nil;
-    }
-    
-    for (curr = answer; curr != NULL; curr = curr->ai_next) {
-        inet_ntop(AF_INET,
-                  &(((struct sockaddr_in *)(curr->ai_addr))->sin_addr),
-                  ipstr, 16);
-        
-        ipString = [NSString stringWithCString:ipstr encoding:NSUTF8StringEncoding];
-        
-    }
-    
-    freeaddrinfo(answer);
-    return ipString;
-}
 
 @end
