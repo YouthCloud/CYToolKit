@@ -77,30 +77,16 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-//#define COMMONURL                 @"http://chonseng.eicp.net:88/dk-mobile/mobile"
-//#define APPHUBURL                @"http://www.cyyun.com/mobiledownload/mobile"
-//#define UPDATE_URL              @"http://www.cyyun.com/down/beta/dk"
+#define COMMONURL               @"http://test.cyyun.com/mobilesvc/mobile"
+#define UPDATE_URL              @"http://test.cyyun.com/ve/ios?device=ic"
+
+//  #define COMMONURL               @"http://www.cyyun.com:8080/mobilesvc/mobile"
+//   #define UPDATE_URL              @"http://www.cyyun.com:8080/ve/ios?device=ic"
+
+//   #define COMMONURL               @"http://chonseng.eicp.net:9080/mobilesvc/mobile"
+//   #define UPDATE_URL              @"http://chonseng.eicp.net:9080/ve/ios?device=ic"
 
 
-//#define COMMONURL                @"http://hy.chonseng.com:8085/dk-mobile/mobile"
-//#define APPHUBURL                @"http://www.cyyun.com/mobiledownload/mobile"
-//#define UPDATE_URL              @"http://www.cyyun.com/down/rls/dk"
-
-
-#define COMMONURL                @"http://10.34.131.207/dk-mobile/mobile"
-#define APPHUBURL                @"http://www.cyyun.com/mobiledownload/mobile"
-#define UPDATE_URL              @"http://www.cyyun.com/down/rls/dk"
-
-///////////////////////////////VPN--INFO///////////////////////////////////////////
-
-#define VPN_HOST_NAME                        @"vpn2.nbyz.gov.cn"
-#define VPN_IP_ChinaTelecom                  @"60.190.59.214"
-#define VPN_IP_ChinaUniom                    @"221.12.47.43"
-#define VPN_IP_ChinaMobile                   @"112.14.180.144"
-#define VPN_PORT                443
-#define VPN_USERNAME            @"yuqingdaokong"
-#define VPN_PASSWORD            @"yuqingdaokong@87523306"
-#define AUTH_TIMEOUT            @"25"
 
 
 //////////////////////////////////////////////////////////////////////////////////
