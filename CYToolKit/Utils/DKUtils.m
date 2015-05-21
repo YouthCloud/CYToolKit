@@ -19,6 +19,8 @@
 #import "CoreTelephony.h"
 
 #import "Marcos.h"
+#import "UIAlertView+UFBlock.h"
+#import "MobClick.h"
 
 
 static const NSInteger k4MImageDataSize = 4 * 1024 * 1024;  // 4M
